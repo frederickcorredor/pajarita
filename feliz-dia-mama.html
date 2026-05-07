@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Feliz Día Mamá 🌹</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --wine: #6B1A2A;
+    --rose: #C2566B;
+    --blush: #E8A0A8;
+    --gold: #C9A96E;
+    --cream: #F5EDE0;
+    --dark: #0D0608;
+    --dark2: #180B0E;
+    --dark3: #1F0F13;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow-x: hidden;
+    background: var(--dark);
+    font-family: 'Lato', sans-serif;
+    color: var(--cream);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ─── SCREEN: WELCOME ─── */
+  #screen-welcome {
+    position: fixed; inset: 0; z-index: 100;
+    background: radial-gradient(ellipse at center top, #2a0c13 0%, #0D0608 70%);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    transition: opacity 1.2s ease, transform 1.2s ease;
+    overflow: hidden;
+  }
+  #screen-welcome.fade-out {
+    opacity: 0; transform: scale(1.08);
+    pointer-events: none;
+  }
+
+  #welcome-content {
+    position: relative; z-index: 2;
+    text-align: center; padding: 2rem 1.5rem;
+    animation: fadeInUp 1.4s ease both;
+  }
+
+  .welcome-rose-icon {
+    font-size: 3rem;
+    animation: floatIcon 3s ease-in-out infinite;
+    display: block; margin-bottom: 1rem;
+    filter: drop-shadow(0 0 20px rgba(194,86,107,0.6));
+  }
+
+  .welcome-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 11vw, 3.8rem);
+    font-weight: 700;
+    color: var(--cream);
+    line-height: 1.1;
+    letter-spacing: 0.01em;
+    text-shadow: 0 0 40px rgba(194,86,107,0.5), 0 2px 8px rgba(0,0,0,0.8);
+    margin-bottom: 0.8rem;
+  }
+
+  .welcome-sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1rem, 4.5vw, 1.3rem);
+    font-style: italic;
+    color: var(--blush);
+    font-weight: 300;
+    margin-bottom: 2.4rem;
+    letter-spacing: 0.03em;
+    line-height: 1.6;
+    opacity: 0.9;
+  }
+
+  #btn-start {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: linear-gradient(135deg, var(--wine), var(--rose));
+    color: var(--cream);
+    border: 1.5px solid rgba(201,169,110,0.4);
+    border-radius: 50px;
+    padding: 0.9rem 2.2rem;
+    font-family: 'Lato', sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    animation: pulseBtn 2.4s ease-in-out infinite;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-transform: uppercase;
+    box-shadow: 0 0 30px rgba(194,86,107,0.35), 0 4px 20px rgba(0,0,0,0.5);
+    -webkit-appearance: none;
+  }
+  #btn-start:active { transform: scale(0.97); }
+
+  @keyframes pulseBtn {
+    0%, 100% { box-shadow: 0 0 20px rgba(194,86,107,0.35), 0 4px 20px rgba(0,0,0,0.4); }
+    50% { box-shadow: 0 0 45px rgba(194,86,107,0.65), 0 4px 25px rgba(0,0,0,0.5); }
+  }
+
+  @keyframes floatIcon {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── PARTICLES CANVAS ─── */
+  #particles-canvas {
+    position: absolute; inset: 0; z-index: 1;
+    pointer-events: none;
+  }
+
+  /* ─── SCREEN: MAIN ─── */
+  #screen-main {
+    display: none;
+    min-height: 100vh;
+    background: var(--dark);
+    position: relative;
+  }
+  #screen-main.visible { display: block; }
+
+  /* ─── CAROUSEL ─── */
+  #carousel-section {
+    position: relative;
+    width: 100%;
+    height: 100svh;
+    overflow: hidden;
+    background: var(--dark2);
+  }
+
+  .slide {
+    position: absolute; inset: 0;
+    opacity: 0;
+    transition: opacity 1.4s ease;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .slide.active { opacity: 1; }
+  .slide.prev { opacity: 0; }
+
+  .slide-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transform: scale(1.08);
+    transition: transform 8s ease;
+    display: block;
+  }
+  .slide.active .slide-img { transform: scale(1.0); }
+
+  .slide-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(13,6,8,0.15) 0%,
+      rgba(13,6,8,0.08) 40%,
+      rgba(13,6,8,0.55) 75%,
+      rgba(13,6,8,0.85) 100%
+    );
+  }
+
+  /* fallback placeholder */
+  .slide-placeholder {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(ellipse at center, #2a0c13 0%, #0D0608 100%);
+    font-size: 5rem;
+    flex-shrink: 0;
+  }
+
+  /* ─── MESSAGE OVERLAY ─── */
+  #message-box {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    z-index: 10;
+    padding: 1.2rem 1.5rem 2rem;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  #current-message {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.1rem, 5vw, 1.5rem);
+    font-style: italic;
+    color: var(--cream);
+    line-height: 1.55;
+    font-weight: 400;
+    text-shadow: 0 1px 12px rgba(0,0,0,0.9), 0 0 30px rgba(194,86,107,0.3);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+    letter-spacing: 0.01em;
+  }
+  #current-message.show {
+    opacity: 1; transform: translateY(0);
+  }
+
+  #message-from {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-top: 0.6rem;
+    opacity: 0;
+    transition: opacity 0.9s ease 0.3s;
+  }
+  #current-message.show ~ #message-from,
+  #message-from.show { opacity: 0.85; }
+
+  /* ─── PROGRESS DOTS ─── */
+  #progress-dots {
+    position: absolute;
+    bottom: calc(2rem + 100px);
+    left: 50%; transform: translateX(-50%);
+    display: flex; gap: 5px; z-index: 10;
+    flex-wrap: wrap; justify-content: center;
+    max-width: 90vw;
+    padding: 0 1rem;
+  }
+
+  .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: rgba(245,237,224,0.3);
+    transition: background 0.4s, transform 0.4s;
+    flex-shrink: 0;
+  }
+  .dot.active {
+    background: var(--rose);
+    transform: scale(1.4);
+  }
+
+  /* ─── SWIPE ZONES ─── */
+  #swipe-prev, #swipe-next {
+    position: absolute; top: 0; bottom: 120px;
+    width: 30%; z-index: 9; cursor: pointer;
+    background: transparent;
+    border: none;
+  }
+  #swipe-prev { left: 0; }
+  #swipe-next { right: 0; }
+
+  /* ─── AUDIO CONTROL ─── */
+  #audio-ctrl {
+    position: fixed; top: 1.1rem; right: 1.1rem;
+    z-index: 200;
+    background: rgba(13,6,8,0.7);
+    border: 1px solid rgba(201,169,110,0.25);
+    border-radius: 50%;
+    width: 42px; height: 42px;
+    display: none; align-items: center; justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: background 0.2s;
+    -webkit-appearance: none;
+  }
+  #audio-ctrl.visible { display: flex; }
+  #audio-ctrl:active { background: rgba(107,26,42,0.6); }
+  #audio-ctrl svg { width: 18px; height: 18px; fill: var(--cream); }
+
+  /* ─── LETTER SECTION ─── */
+  #letter-section {
+    padding: 3rem 1.5rem 2rem;
+    background: linear-gradient(180deg, var(--dark2) 0%, var(--dark3) 100%);
+    text-align: center;
+  }
+
+  .letter-deco {
+    width: 2px; height: 50px;
+    background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+    margin: 0 auto 1.5rem;
+  }
+
+  .letter-date {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.22em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1.8rem;
+    opacity: 0.75;
+  }
+
+  .letter-heading {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.7rem, 7vw, 2.4rem);
+    color: var(--cream);
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 2rem;
+    text-shadow: 0 0 30px rgba(194,86,107,0.2);
+  }
+
+  .letter-body {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.05rem, 4.5vw, 1.25rem);
+    font-weight: 300;
+    color: rgba(245,237,224,0.88);
+    line-height: 1.85;
+    max-width: 420px;
+    margin: 0 auto 1.5rem;
+    letter-spacing: 0.01em;
+  }
+
+  .letter-signature {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.1rem, 4.5vw, 1.4rem);
+    font-style: italic;
+    color: var(--rose);
+    margin-top: 2rem;
+    letter-spacing: 0.04em;
+  }
+
+  .rose-divider {
+    font-size: 1.5rem;
+    margin: 1.6rem 0;
+    opacity: 0.7;
+    display: block;
+  }
+
+  /* ─── HEARTS CANVAS ─── */
+  #hearts-canvas {
+    position: fixed; inset: 0; z-index: 1;
+    pointer-events: none;
+    display: none;
+  }
+  #hearts-canvas.visible { display: block; }
+
+  /* ─── FOOTER ─── */
+  #footer-section {
+    padding: 2.5rem 1.5rem 3.5rem;
+    text-align: center;
+    background: var(--dark);
+    border-top: 1px solid rgba(201,169,110,0.12);
+  }
+
+  .footer-heart {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.8rem;
+    animation: floatIcon 3s ease-in-out infinite;
+  }
+
+  .footer-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.18em;
+    color: rgba(245,237,224,0.4);
+    text-transform: uppercase;
+  }
+
+  /* ─── SCROLL ANIMATIONS ─── */
+  .fade-in-scroll {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+  }
+  .fade-in-scroll.visible {
+    opacity: 1; transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- WELCOME SCREEN -->
+<div id="screen-welcome">
+  <canvas id="particles-canvas"></canvas>
+  <div id="welcome-content">
+    <span class="welcome-rose-icon">🌹</span>
+    <h1 class="welcome-title">Feliz Día<br>Mamá</h1>
+    <p class="welcome-sub">Hoy queremos recordarte<br>cuánto te amamos.</p>
+    <button id="btn-start">Haz clic aquí ❤️</button>
+  </div>
+</div>
+
+<!-- HEARTS OVERLAY -->
+<canvas id="hearts-canvas"></canvas>
+
+<!-- AUDIO CONTROL -->
+<button id="audio-ctrl" aria-label="Pausar o reproducir música">
+  <svg id="icon-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+  <svg id="icon-play"  viewBox="0 0 24 24" style="display:none"><polygon points="5,3 19,12 5,21"/></svg>
+</button>
+
+<!-- AUDIO -->
+<audio id="bg-audio" loop preload="auto">
+  <source src="audio/song.mp3" type="audio/mpeg">
+</audio>
+
+<!-- MAIN SCREEN -->
+<div id="screen-main">
+
+  <!-- CAROUSEL -->
+  <section id="carousel-section">
+    <div id="slides-container"></div>
+
+    <div id="message-box">
+      <p id="current-message"></p>
+      <p id="message-from">Con amor, Tomás y Frederick 🌹</p>
+    </div>
+
+    <div id="progress-dots"></div>
+
+    <button id="swipe-prev" aria-label="Anterior"></button>
+    <button id="swipe-next" aria-label="Siguiente"></button>
+  </section>
+
+  <!-- LETTER -->
+  <section id="letter-section">
+    <div class="letter-deco"></div>
+    <p class="letter-date fade-in-scroll">Día de la Madre · 2025</p>
+    <h2 class="letter-heading fade-in-scroll">Para la mujer más<br>importante de nuestras vidas</h2>
+
+    <p class="letter-body fade-in-scroll">
+      Mamá, cada página de nuestra historia está escrita con tu amor. 
+      Fuiste y siempre serás el lugar donde siempre queremos volver.
+    </p>
+    <span class="rose-divider fade-in-scroll">🌹</span>
+    <p class="letter-body fade-in-scroll">
+      No existen palabras suficientes para describir lo que significas para nosotros. 
+      Pero cada fotografía, cada recuerdo, cada abrazo silencioso 
+      dice lo que el corazón no siempre puede expresar.
+    </p>
+    <span class="rose-divider fade-in-scroll">✨</span>
+    <p class="letter-body fade-in-scroll">
+      Gracias por tu fuerza, tu ternura, tu dedicación 
+      y por cada sacrificio que hiciste con una sonrisa. 
+      Somos lo que somos gracias a ti.
+    </p>
+    <span class="rose-divider fade-in-scroll">🌹</span>
+    <p class="letter-body fade-in-scroll">
+      Hoy y siempre, tu recuerdo vive en cada latido de nuestros corazones. 
+      Te amamos más de lo que las palabras pueden explicar.
+    </p>
+    <p class="letter-signature fade-in-scroll">Con todo nuestro amor,<br>Tomás y Frederick</p>
+    <div class="letter-deco" style="margin-top:2rem"></div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer id="footer-section">
+    <span class="footer-heart">❤️</span>
+    <p class="footer-text">Hecho con amor · Siempre para ti</p>
+  </footer>
+
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────
+const IMAGES = Array.from({length: 31}, (_, i) => `img/${i+1}.jpg`);
+
+const MESSAGES = [
+  "Gracias por llenar nuestra vida de amor.",
+  "Mamá, eres el corazón de nuestra familia.",
+  "No existe un lugar más seguro que tus abrazos.",
+  "Tu sonrisa ilumina incluso nuestros días más difíciles.",
+  "Cada recuerdo contigo es un tesoro eterno.",
+  "Eres fuerza, ternura y amor infinito.",
+  "Tomás y Frederick siempre estarán orgullosos de ti.",
+  "Gracias por nunca soltarnos la mano.",
+  "Tus consejos viven para siempre en nuestro corazón.",
+  "El amor de una madre es el regalo más grande de la vida.",
+  "Mamá, contigo aprendimos lo que significa amar.",
+  "No importa cuánto crezcamos, siempre necesitaremos tus abrazos.",
+  "Tu felicidad también es nuestra felicidad.",
+  "Gracias por cada sacrificio silencioso.",
+  "Tus hijos te aman más de lo que las palabras pueden explicar.",
+  "Eres nuestro hogar.",
+  "Cada fotografía guarda un pedazo de nuestra historia contigo.",
+  "Tu amor hizo hermosa nuestra vida.",
+  "Gracias por acompañarnos en cada etapa.",
+  "Mamá, eres simplemente irremplazable.",
+  "Hoy celebramos a la mujer más importante de nuestras vidas.",
+  "Tu voz siempre trae tranquilidad a nuestras almas.",
+  "Eres la razón de muchos de nuestros mejores recuerdos.",
+  "Siempre serás nuestro lugar favorito.",
+  "Tu amor dejó huellas eternas en nosotros.",
+  "Gracias por cuidarnos incluso cuando nadie veía tu esfuerzo.",
+  "El tiempo pasa, pero nuestro amor por ti solo crece.",
+  "Tus abrazos siempre curan el alma.",
+  "Contigo aprendimos el verdadero significado de familia.",
+  "Gracias por cada momento feliz que nos regalaste.",
+  "Tu amor vive en cada parte de nuestra historia.",
+  "Mamá, eres nuestra mayor bendición.",
+  "En cada paso que damos, tu amor nos acompaña.",
+  "Gracias por enseñarnos a ser mejores personas.",
+  "Tu valentía es nuestra mayor inspiración.",
+  "Cada día a tu lado fue un regalo.",
+  "Eres la razón de nuestra fortaleza.",
+  "Nadie nos conoce mejor ni nos ama más que tú.",
+  "Tus manos cargaron nuestro mundo con amor.",
+  "Gracias por ser nuestra primera maestra.",
+  "Tu risa es la melodía más bonita de nuestra vida.",
+  "En ti encontramos la paz que el mundo no puede dar.",
+  "Eres nuestra estrella más brillante.",
+  "Gracias por creer en nosotros siempre.",
+  "Tu amor es el cimiento de todo lo que somos.",
+  "No hay distancia que separe el amor que sentimos por ti.",
+  "Eres el ejemplo más hermoso de amor incondicional.",
+  "Cada mañana tiene más luz pensando en tu sonrisa.",
+  "Gracias por convertir lo difícil en posible.",
+  "Tu ternura es el recuerdo más dulce de nuestra infancia.",
+  "Eres nuestra razón para dar siempre lo mejor.",
+];
+
+// ─── PARTICLE SYSTEM (WELCOME) ───────────────────────────────────────
+(function initParticles() {
+  const canvas = document.getElementById('particles-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // roses and petals
+  const EMOJI = ['🌹','🌷','✨','💕','🌸'];
+
+  function mkParticle() {
+    return {
+      x: Math.random() * W,
+      y: -40,
+      size: 14 + Math.random() * 18,
+      speed: 0.5 + Math.random() * 0.9,
+      drift: (Math.random() - 0.5) * 0.6,
+      opacity: 0.5 + Math.random() * 0.5,
+      rotation: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.02,
+      emoji: EMOJI[Math.floor(Math.random() * EMOJI.length)],
+    };
+  }
+
+  for (let i = 0; i < 15; i++) {
+    const p = mkParticle();
+    p.y = Math.random() * H;
+    particles.push(p);
+  }
+
+  let animId;
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    if (particles.length < 18 && Math.random() < 0.04) particles.push(mkParticle());
+    particles = particles.filter(p => p.y < H + 60);
+    particles.forEach(p => {
+      p.y += p.speed;
+      p.x += p.drift;
+      p.rotation += p.rotSpeed;
+      ctx.save();
+      ctx.globalAlpha = p.opacity;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation);
+      ctx.font = `${p.size}px serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(p.emoji, 0, 0);
+      ctx.restore();
+    });
+    animId = requestAnimationFrame(draw);
+  }
+  draw();
+
+  window._stopParticles = () => cancelAnimationFrame(animId);
+})();
+
+// ─── HEARTS ANIMATION (MAIN) ─────────────────────────────────────────
+function initHearts() {
+  const canvas = document.getElementById('hearts-canvas');
+  canvas.classList.add('visible');
+  const ctx = canvas.getContext('2d');
+  let W, H, hearts = [];
+
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function mkHeart() {
+    return {
+      x: Math.random() * W,
+      y: H + 30,
+      size: 8 + Math.random() * 14,
+      speed: 0.3 + Math.random() * 0.5,
+      drift: (Math.random() - 0.5) * 0.4,
+      opacity: 0.15 + Math.random() * 0.25,
+      emoji: Math.random() > 0.5 ? '❤️' : '🌹',
+    };
+  }
+
+  function tick() {
+    ctx.clearRect(0, 0, W, H);
+    if (hearts.length < 12 && Math.random() < 0.025) hearts.push(mkHeart());
+    hearts = hearts.filter(h => h.y > -40);
+    hearts.forEach(h => {
+      h.y -= h.speed;
+      h.x += h.drift;
+      ctx.save();
+      ctx.globalAlpha = h.opacity;
+      ctx.font = `${h.size}px serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText(h.emoji, h.x, h.y);
+      ctx.restore();
+    });
+    requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+// ─── BUILD CAROUSEL ───────────────────────────────────────────────────
+const container = document.getElementById('slides-container');
+const dotsEl    = document.getElementById('progress-dots');
+
+IMAGES.forEach((src, i) => {
+  const slide = document.createElement('div');
+  slide.className = 'slide' + (i === 0 ? ' active' : '');
+  slide.dataset.index = i;
+
+  const img = document.createElement('img');
+  img.className = 'slide-img';
+  img.alt = `Recuerdo ${i+1}`;
+  img.loading = i < 3 ? 'eager' : 'lazy';
+
+  // Try to load image; show placeholder if fails
+  img.onerror = function() {
+    const ph = document.createElement('div');
+    ph.className = 'slide-placeholder';
+    ph.textContent = ['🌹','💕','🌸','✨','🌷'][i % 5];
+    slide.replaceChild(ph, this);
+  };
+  img.src = src;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'slide-overlay';
+
+  slide.appendChild(img);
+  slide.appendChild(overlay);
+  container.appendChild(slide);
+
+  const dot = document.createElement('div');
+  dot.className = 'dot' + (i === 0 ? ' active' : '');
+  dotsEl.appendChild(dot);
+});
+
+// ─── CAROUSEL LOGIC ───────────────────────────────────────────────────
+let currentSlide = 0;
+let autoTimer, msgTimer;
+let msgIndex = 0;
+
+const slides  = () => document.querySelectorAll('.slide');
+const dots    = () => document.querySelectorAll('.dot');
+const msgEl   = document.getElementById('current-message');
+const fromEl  = document.getElementById('message-from');
+
+function goTo(idx) {
+  const sl = slides();
+  const dt = dots();
+  sl[currentSlide].classList.remove('active');
+  dt[currentSlide].classList.remove('active');
+  currentSlide = (idx + IMAGES.length) % IMAGES.length;
+  sl[currentSlide].classList.add('active');
+  dt[currentSlide].classList.add('active');
+}
+
+function nextSlide() { goTo(currentSlide + 1); }
+function prevSlide() { goTo(currentSlide - 1); }
+
+function startAuto() {
+  clearInterval(autoTimer);
+  autoTimer = setInterval(nextSlide, 5000);
+}
+
+// ─── MESSAGES ─────────────────────────────────────────────────────────
+function showMessage(txt) {
+  msgEl.classList.remove('show');
+  fromEl.classList.remove('show');
+  setTimeout(() => {
+    msgEl.textContent = txt;
+    msgEl.classList.add('show');
+    fromEl.classList.add('show');
+  }, 350);
+}
+
+function cycleMessages() {
+  showMessage(MESSAGES[msgIndex % MESSAGES.length]);
+  msgIndex++;
+}
+
+function startMessages() {
+  clearInterval(msgTimer);
+  cycleMessages();
+  msgTimer = setInterval(cycleMessages, 4500);
+}
+
+// ─── SWIPE SUPPORT ────────────────────────────────────────────────────
+let touchStartX = 0;
+const cs = document.getElementById('carousel-section');
+
+cs.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, {passive: true});
+cs.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 40) {
+    if (dx < 0) nextSlide(); else prevSlide();
+    startAuto();
+  }
+}, {passive: true});
+
+document.getElementById('swipe-prev').addEventListener('click', () => { prevSlide(); startAuto(); });
+document.getElementById('swipe-next').addEventListener('click', () => { nextSlide(); startAuto(); });
+
+// ─── AUDIO ────────────────────────────────────────────────────────────
+const audio    = document.getElementById('bg-audio');
+const audioBtn = document.getElementById('audio-ctrl');
+const iconPause = document.getElementById('icon-pause');
+const iconPlay  = document.getElementById('icon-play');
+let   audioOn  = false;
+
+audio.volume = 0.55;
+
+function toggleAudio() {
+  if (audioOn) {
+    audio.pause();
+    iconPause.style.display = 'none';
+    iconPlay.style.display  = 'block';
+    audioOn = false;
+  } else {
+    audio.play().catch(() => {});
+    iconPause.style.display = 'block';
+    iconPlay.style.display  = 'none';
+    audioOn = true;
+  }
+}
+audioBtn.addEventListener('click', toggleAudio);
+
+// ─── WELCOME BUTTON ───────────────────────────────────────────────────
+document.getElementById('btn-start').addEventListener('click', () => {
+  const welcome = document.getElementById('screen-welcome');
+  welcome.classList.add('fade-out');
+
+  setTimeout(() => {
+    welcome.style.display = 'none';
+    window._stopParticles && window._stopParticles();
+
+    const main = document.getElementById('screen-main');
+    main.classList.add('visible');
+    audioBtn.classList.add('visible');
+
+    // Try autoplay
+    audio.play().then(() => {
+      audioOn = true;
+      iconPause.style.display = 'block';
+      iconPlay.style.display  = 'none';
+    }).catch(() => {
+      audioOn = false;
+      iconPause.style.display = 'none';
+      iconPlay.style.display  = 'block';
+    });
+
+    initHearts();
+    startAuto();
+    startMessages();
+    initScrollFades();
+  }, 1200);
+});
+
+// ─── SCROLL FADE-IN ───────────────────────────────────────────────────
+function initScrollFades() {
+  const els = document.querySelectorAll('.fade-in-scroll');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  els.forEach(el => io.observe(el));
+}
+</script>
+</body>
+</html>
